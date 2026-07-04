@@ -68,7 +68,6 @@ Added `221.181.185.159` to the firewall block list with a comment noting it as t
 - Escalation is a critical skill, not a failure. Recognizing when to hand an alert to a senior analyst or SOC lead is part of the job, not a shortcut around it.
 - Escalating doesn't mean stepping back — containment (blocking the IP at the firewall) still fell to me. A Level 1 analyst acts to limit damage immediately, then lets the escalation path handle deeper investigation or remediation.
 - The SOC is a **team sport** — engineers build the tools, analysts monitor and investigate, seniors handle complexity, and managers keep the operation running. Understanding this structure early helps me see where I fit and where I'm headed on the path to CISO.
-- This room set the tone for the rest of the SOC Level 1 path: expect a mix of narrative context and hands-on simulation, not just theory.
 
 ---
 
