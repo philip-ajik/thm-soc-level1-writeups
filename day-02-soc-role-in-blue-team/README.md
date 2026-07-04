@@ -73,5 +73,3 @@ After placing every role — including Lucas (SOC L1 Analyst) on the firewall br
 
 ---
 
-*Previous: [Day 1 — Junior Security Analyst Intro](../day1/day1.md)*
-*Next: [Day 3 — coming soon]*
