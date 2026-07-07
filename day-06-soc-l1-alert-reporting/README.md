@@ -35,12 +35,12 @@ Five alerts were listed, two still unassigned ("Spike of Domain Discovery Comman
 ![Dashboard Initial Alerts](screenshots/01-dashboard-initial-alerts.png)
 
 **2. Reviewed a pre-existing alert for context**
-Expanded "Sensitive Document Share to External" to see how a properly documented True Positive report looks: HR lead **m.boslan@tryhackme.thm** had shared an "Employee Records (Updated)" spreadsheet to an unidentified external Proton Mail address after being blocked from bulk-downloading the HR folder — already escalated to E.Fleming (L2).
+Expanded "Sensitive Document Share to External" to see how a properly documented True Positive report looks: HR lead **m[.]boslan@tryhackme[.]thm** had shared an "Employee Records (Updated)" spreadsheet to an unidentified external Proton Mail address after being blocked from bulk-downloading the HR folder — already escalated to E.Fleming (L2).
 
 ![Sensitive Document Leak Detail](screenshots/02-sensitive-document-leak-detail.png)
 
 **3. Investigated the phishing alert**
-Expanded "Email Marked as Phishing after Delivery": a spoofed email claiming to be from **Microsoft Support (support@microsoft.com)**, sent to Eddie Huffman (IT Manager), with a fake "600% price increase" urgency hook, failed SPF/DKIM checks, and a suspicious `REPORT.rar` attachment.
+Expanded "Email Marked as Phishing after Delivery": a spoofed email claiming to be from **Microsoft Support (support[@]microsoft[.]com)**, sent to Eddie Huffman (IT Manager), with a fake "600% price increase" urgency hook, failed SPF/DKIM checks, and a suspicious `REPORT.rar` attachment.
 
 ![Phishing Alert Detail (Unassigned)](screenshots/03-phishing-alert-detail-unassigned.png)
 
