@@ -120,7 +120,3 @@ Swapped Daily Vulnerability Scanning for **Access Management Policy** instead, k
 - Not every "more security" option is the right security option. Daily Vulnerability Scanning looked like a strong choice on paper but was the wrong one in this context — a reminder to weigh operational cost and actual risk reduction, not just how proactive a control sounds.
 - Mitigation and Detection are two different jobs but work together: mitigation (training, antivirus, anti-phishing, access policies) reduces how often I'll see these cases; detection is what catches the ones that get through anyway — which is where my SOC L1 skills come in.
 - Small details mattered across every case: a slightly-off domain (`stripe-payments.xyz`, `micrsoft365-online.ru`), a call at an odd hour from a hidden number, a login location just far enough from the norm to be worth checking. SOC triage often comes down to noticing what looks "almost right."
-
----
-
-*Previous: [Day 2 — SOC Role in Blue Team](../day2/day2.md)*
