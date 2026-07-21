@@ -78,8 +78,3 @@ Examined the detection rule itself — it matched on the term **"Miner"** in the
 - The Event ID 104 / Event ID 4688 examples were a good concrete reminder that a "detection rule" isn't magic — it's a plain logical condition (source + field value), which means reading a rule's actual definition (like I did in Step 5, matching on "Miner") is often the fastest way to understand *why* something fired.
 - A single anomalous entry in an aggregate table (that `cudominer.exe` count-of-1 in Step 1) can be a faster lead than digging through raw logs — worth scanning dashboard summaries for outliers before diving into event-by-event review.
 - The final decision — True Positive + isolate the host — is a direct, practical instance of Day 9's EDR "Response" capabilities (isolate host) being triggered off a SIEM-side detection, showing how SIEM and EDR complement rather than duplicate each other.
-
----
-
-*Previous: [Day 9 — Introduction to EDR](../day9/day9.md)*
-*Next: [Day 11 — Splunk: The Basics](../day11/day11.md)*
