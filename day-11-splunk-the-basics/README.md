@@ -101,7 +101,4 @@ Ran `| spath | search Source_ip="107.3.206.58" | stats count` and found **14 eve
 - Using the real `source=` and `host=` values that Splunk actually assigned (rather than the placeholder `host="1"` from my first search) mattered — small copy-paste or leftover values from an earlier query can silently make a "working" search return the wrong scope of data.
 - Practicing basic SPL commands here (`search`, `stats count`, `stats values(...)  as ... count`, `spath`) gives me a foundation I can build on for more advanced correlation searches in future SOC Level 1 rooms — this felt like the first "real tool" room in the path, versus the simulated dashboards in Days 5–10.
 
----
 
-*Previous: [Day 10 — Introduction to SIEM](../day10/day10.md)*
-*Next: [Day 12 — coming soon]*
