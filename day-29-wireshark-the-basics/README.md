@@ -1,4 +1,4 @@
-# Day 28: Network Traffic Basics
+# Day 29: Wireshark: The Basics
 
 **Path:** SOC Level 1
 **Platform:** TryHackMe
@@ -8,94 +8,103 @@
 
 ## 📌 Overview
 
-Network Traffic Analysis (NTA) isn't just "using Wireshark" — it's correlating logs, doing deep packet inspection, and pulling network flow statistics together with a specific goal in mind: full visibility into what's moving in and out of the network, and knowing what's normal versus what deviates from baseline.
+Wireshark is an open-source, cross-platform packet analyser for both live traffic and existing captures (PCAPs) — one of the standard tools for packet-level analysis. It's used for troubleshooting network problems (load failures, congestion), spotting security anomalies (rogue hosts, odd port usage, suspicious traffic), and just learning protocol behaviour (response codes, payload structure). One thing worth keeping straight: **Wireshark is not an IDS**. It doesn't flag anything on its own and it doesn't modify packets — it only reads and displays them. Spotting the anomaly is entirely on the analyst.
 
-The room opened with a scenario that makes the case for NTA well: an SOC analyst gets an alert for an unusual volume of DNS queries from a host, all hitting the same top-level domain with different subdomains each time. DNS logs alone (query, subdomain/TLD, host IP, destination IP, timestamp) aren't enough to draw a conclusion — you need to inspect the actual content of the DNS traffic, because that's where a threat actor could be smuggling C2 instructions through TXT records. Logs tell you *that* a query happened; only the packet content tells you *what was actually said*.
+The GUI centers around a single all-in-one page: a toolbar, the display filter bar, a recent-files list, capture filters/interfaces, and a status bar. Once a capture is loaded, packet data splits into three panes — the **packet list** (one line per packet: source, destination, protocol, info), the **packet details** (full protocol breakdown of whatever's selected), and the **packet bytes** (hex + ASCII, which highlights in sync with whatever field you click in the details pane).
 
-That maps onto the TCP/IP stack directly — each layer only logs a fragment of what it actually carries:
-- **Application** — headers + payload (e.g. an HTTP GET/response). Most proxies log the headers but not the payload, so a malicious ZIP's actual content is invisible in the logs.
-- **Transport** — TCP/UDP headers. Logs usually keep source/destination port and flags but drop sequence numbers, which is exactly what you'd need to catch session hijacking.
-- **Internet** — source/destination IP and TTL are typically logged, but fragment offset and total length (needed to catch fragmentation attacks like overlapping byte ranges) usually aren't.
-- **Link** — MAC addressing. Logs won't show a MAC address showing up across multiple interfaces or a flood of gratuitous ARP replies, which is what ARP poisoning looks like in practice.
-
-Traffic sources split into **intermediary** (firewalls, switches, routers, proxies — they pass traffic more than they generate it) and **endpoint** (servers, hosts, IoT, anything traffic actually originates/ends at). Flows split into **North-South** (crosses the firewall, LAN↔WAN — HTTPS, DNS, SSH, VPN, SMTP, RDP) and **East-West** (stays inside the LAN — Kerberos/LDAP auth, SMB file shares, internal DNS, DHCP, database/API traffic, backup replication, SNMP/Syslog/NetFlow).
-
-To actually observe traffic, you've got three options: **logs** (vendor-dependent, rarely a full packet), **full packet capture** (via a physical network TAP — link-layer only, no MAC/IP needed, near-zero performance hit — or port mirroring/SPAN, which is software-based and can add overhead on busy ports), and **network statistics** (NetFlow or its vendor-neutral successor IPFIX — metadata about flows rather than packet contents, useful for spotting C2 traffic, exfiltration, and lateral movement without the storage cost of full packet capture).
+A few things worth remembering from the walkthrough:
+- **Colouring** — packets are colour-coded by protocol/condition by default; you can add temporary (session-only) or permanent (profile-saved) custom rules.
+- **Sniffing** — blue shark button starts capture, red stops it, green restarts it.
+- **Merging** — `File → Merge` combines two pcaps into a new one (needs saving before you can work on it).
+- **File details** — `Statistics → Capture File Properties` (or the pcap icon, bottom-left) gives hash, capture time, comments, interface, and stats — handy when juggling multiple pcaps.
+- **Packet navigation** — every packet gets a unique number; `Go to Packet` jumps straight to one; `Edit → Find Packet` searches by display filter, hex, string, or regex across the list/details/bytes panes (you have to search the *right* pane for what you're after); packets can be **marked** (session-only, shown in black) or **commented** (persists in the file until removed).
+- **Exporting** — `File → Export...` pulls out a subset of packets, and `Export Objects` reconstructs whole transferred files for a handful of supported protocols (DICOM, HTTP, IMF, SMB, TFTP).
+- **Time display** — defaults to "seconds since beginning of capture"; UTC is the more usable option, set via `View → Time Display Format`.
+- **Expert Info** (`Analyse → Expert Information`) — surfaces protocol states across four severities (Chat/Note/Warn/Error), grouped by things like checksum errors, malformed packets, deprecated protocol usage, comments. Suggestions only — false positives/negatives are possible.
+- **Filtering** — capture filters decide what gets captured, display filters decide what you *see* afterward. Right-click gives you Apply as Filter (single field), Conversation Filter (everything tied to an IP/port pair), Colourise Conversation (same idea, but highlight instead of filter), Prepare as Filter (stages the query without running it), and Apply as Column (pins a field as a visible column). `Follow TCP/UDP/HTTP Stream` reconstructs the full application-level exchange — server packets in blue, client in red — which is how you'd see things like unencrypted usernames/passwords.
+- Basic display filter syntax: protocol name directly (`http`, `arp`, `dhcp`, `ftp`...), by port (`tcp.port == 80`), or by IP (`ip.addr == 192.168.1.2`).
 
 ---
 
 ## 🛠️ Tools Used
 
-- TryHackMe's static "Traffic Analysis Basics" exercise site — drag-and-drop network TAP placement + built-in packet viewer (no separate Wireshark instance used for this room)
+- Wireshark (v3.2.3) — GUI walkthrough, packet inspection, Export Objects, Expert Information
+- Linux terminal — `md5sum` for hashing
 
 ---
 
 ## 🪜 Steps Followed
 
-**1. Read the exercise instructions**
-Objective: place the network tap in the most efficient spot to actually capture the traffic in question — the wrong location just won't show it.
+**1. Opened Wireshark and checked recent files**
+Two recent captures listed: `Exercise.pcapng` and `http1.pcapng`.
 
-![Exercise instructions](screenshots/01-exercise-instructions.png)
+![Wireshark main window, File menu with recent files](screenshots/01-wireshark-main-window-recent-files.png)
 
-**2. Started Scenario 1/2 — Malicious PS Download**
-A user clicked a phishing link, triggering an HTTP request for a malicious PowerShell file. Task: find the right tap placement to capture that web traffic and recover the flag from the HTTP response.
+**2. Loaded `http1.pcapng` and reviewed the basic packet flow**
+TCP handshake, an HTTP GET, and a DNS query all visible in the packet list — a first look at how a capture actually reads once loaded.
 
-![Scenario 1 start — Malicious PS Download](screenshots/02-scenario1-malicious-ps-download-start.png)
+![Loading http1.pcapng — TCP handshake and DNS](screenshots/02-loading-http1-pcapng-tcp-dns.png)
 
-**3. Looked at the full network diagram**
-Reviewed the layout before placing the tap — workstation, firewall, router, switches, mail/DNS servers, and endpoint hosts.
+**3. Switched to `Exercise.pcapng` and searched for the "r4w" string**
+Found it in an HTTP 200 OK response body — the answer to "what is the name of artist 1" was `r4w8173`.
 
-![Network diagram with tap slots, running](screenshots/03-network-diagram-running-tap-slots.png)
+![Searching "r4w" in Exercise.pcapng — artist 1 answer](screenshots/03-exercise-pcapng-search-r4w-artist1-answer.png)
 
-**4. Placed the tap on the Web Proxy**
-Correct on this attempt — the web proxy handles all HTTP(S) requests leaving and entering the network, so it's the one point that sees all web traffic.
+**4. Noticed the packet comments pane**
+Spotted a truncated, repeating comment string sitting in the packet comments panel while browsing.
 
-![Tap correctly placed on Web Proxy](screenshots/04-scenario1-tap-correct-web-proxy.png)
+![Packet comments pane showing truncated repeating text](screenshots/04-packet-comments-pane-truncated-text.png)
 
-**5. Found the HTTP GET request in the packet capture**
-Captured the client's GET request for the file.
+**5. Attempted the "packet 12 comment → MD5 hash" question — got it wrong first**
+Created an empty file (`neww`), ran `md5sum` on it, and submitted that hash. TryHackMe rejected it. In hindsight this was the MD5 hash of an empty file, not an answer derived from the actual packet 12 comment.
 
-![Captured HTTP GET request](screenshots/05-scenario1-packets-http-get-request.png)
+![Task questions panel and terminal — first MD5 attempt, incorrect](screenshots/05-task-questions-panel-terminal-md5-mistake.png)
 
-**6. Found the flag in the HTTP response**
-The server's 200 response body contained the flag: `THM{FoundTheMalware}`.
+**6. Opened packet 12's actual comment**
+The comment was just a repeating `This_is_Not_a_Flag_...` string — no embedded instruction and no pointer to another packet, which didn't match what the question implied should be there. I flagged this as a discrepancy in the lab file rather than something I was missing.
 
-![HTTP response with flag](screenshots/06-scenario1-http-response-flag.png)
+![Packet 12 comment dialog — repeating placeholder text](screenshots/06-packet12-comment-dialog-not-a-flag.png)
 
-**7. Started Scenario 2/2 — DNS Infiltration**
-A workstation was compromised and C2 instructions were being smuggled in via DNS TXT records. Task: find the right tap placement for DNS traffic and recover the flag.
+**7. Used Export Objects to pull the embedded .txt file**
+`File → Export Objects → HTTP`, filtered for `.txt`, found and saved `note.txt`. Opened it in the terminal — a large ASCII-art alien head with **PACKETMASTER** printed at the bottom.
 
-![Scenario 2 start — DNS Infiltration](screenshots/07-scenario2-dns-infiltration-start.png)
+![Export Objects — note.txt found, alien name PACKETMASTER](screenshots/07-export-objects-notetxt-alien-packetmaster.png)
 
-**8. First tap placement attempt was wrong**
-Placed it on a switch — got told this location can only show web traffic entering/exiting the network, not DNS traffic specifically.
+**8. Reviewed Expert Information**
+Opened `Analyse → Expert Information` to see the categorized list — HTTP header groupings, TCP sequence issues (keep-alive segments, spurious/suspected retransmissions), and comment entries.
 
-![Wrong tap placement](screenshots/08-scenario2-tap-wrong-placement.png)
+![Expert Information dialog](screenshots/08-expert-information-dialog.png)
 
-**9. Placed the tap on the DNS server**
-Correct — the DNS server handles all external DNS queries and replies on behalf of the host, so all external DNS traffic passes through it.
+**9. Applied HTTP as a filter from packet 4**
+Right-clicked "Hypertext Transfer Protocol" on packet 4 and applied it as a filter — the resulting filter query was simply `http`.
 
-![Tap correctly placed on DNS server](screenshots/09-scenario2-tap-correct-dns-server.png)
+![Packet 4 — Apply as Filter on HTTP](screenshots/09-packet4-apply-as-filter-http.png)
 
-**10. Found the flag in the DNS TXT record response**
-Had to use the hint for this one — "C2 commands are often infiltrated via TXT records" — before spotting the DNS response containing `THM{C2CommandFound}`.
+**10. Inspected HTTP response details in Exercise.pcapng**
+Looked at content-encoding (gzip) and the "previous request/response in frame" links Wireshark builds automatically between related packets.
 
-![DNS TXT record response with flag](screenshots/10-scenario2-dns-txt-record-flag.png)
+![HTTP response showing content-encoding gzip and frame links](screenshots/10-exercise-pcapng-http-content-encoding-gzip.png)
 
 ---
 
 ## 🔍 Key Findings
 
-- **Flag 1:** `THM{FoundTheMalware}` — recovered from the HTTP response body after tapping the Web Proxy in Scenario 1.
-- **Flag 2:** `THM{C2CommandFound}` — recovered from a DNS TXT record response after tapping the DNS server in Scenario 2; needed the hint to get there.
-- Tap placement isn't one-size-fits-all — the correct spot depends entirely on which traffic type you're after. A switch showed web traffic fine but wasn't sufficient for DNS visibility; only the actual DNS server had full visibility into that flow.
-- Logs are a starting point, not the finish line — both flags here lived in the *content* of a packet (an HTTP response body, a DNS TXT record), which is exactly the kind of data that standard logging on these devices wouldn't have captured.
+- **Capture file comment flag:** `TryHackMe_Wireshark_Demo`
+- **Total packets in Exercise.pcapng:** 58,620
+- **SHA256 of the capture file:** `f446de335565fb0b0ee5e5a3266703c778b2f3dfad7efeaeccb2da5641a6d6eb`
+- **Artist 1 (via "r4w" string search):** `r4w8173`
+- **Packet 12 comment / MD5 question, correct answer:** `911cd574a42865a956ccde2d04495ebf` (my first attempt, `d41d8cd98f00b204e9800998ecf8427e`, was the MD5 of an empty file — a mistake, not the answer)
+- **Alien's name (from the extracted .txt via Export Objects):** `PACKETMASTER`
+- **Filter query from right-clicking HTTP on packet 4:** `http`
+- Packet 12's actual comment content didn't match what the question implied it should contain (no pointer to another packet/file) — documented as a lab discrepancy rather than assumed to be my error.
+- Didn't manage to answer the room's last question (total number of artists in the HTTP response after following the stream on packet 33790) — no screenshot or note captured for that one.
 
 ---
 
 ## 💡 Lessons Learned
 
-- Getting the wrong-placement message on Scenario 2 was actually useful — it made the North-South vs. specific-device distinction concrete instead of just theoretical (a switch sees traffic passing through it, but that's not the same as being the authoritative source for a given protocol like DNS).
-- Needing the hint for the second flag was a good reminder that "DNS tunneling" isn't abstract — TXT records are a real, standard-looking DNS response type that C2 traffic hides inside, and you have to actually go looking at the reply content, not just the query, to catch it.
-- This connects directly to Day 27's alert #1034 in the Phishing Unfolding sim — `nslookup.exe` piping a base64-looking string to an external domain was exactly this kind of DNS-based C2/exfiltration pattern, just seen from the process side (Sysmon) instead of the packet-capture side. Nice to have both angles on the same technique back to back.
+- The empty-file MD5 mistake (`d41d8cd98f00b204e9800998ecf8427e`) was a useful one to make — it's a well-known hash precisely because it's what you get from hashing nothing, which made the error obvious once I looked at it again rather than assuming the room's answer was wrong.
+- Distinguishing "the lab is broken" from "I'm missing something" mattered here — packet 12's comment genuinely didn't contain what the question setup implied, and it was worth writing that discrepancy up rather than quietly working around it.
+- Export Objects turned out to be the right tool for the .txt/alien-name question — a good concrete example of reconstructing a transferred file instead of trying to eyeball it out of the hex pane.
+- This is a natural follow-on from Day 28's Network Traffic Basics — that room was about *where* to place a tap and *why* full packet capture matters over logs; this one is the tool you'd actually use once you've got that capture in hand.
 
