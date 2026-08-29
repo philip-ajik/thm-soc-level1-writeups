@@ -1,4 +1,4 @@
-# 🔵 TryHackMe — SOC Level 1 Write-ups
+# 🔵 TryHackMe - SOC Level 1 Write-ups
 
 Daily lab documentation from my TryHackMe SOC Level 1 learning journey.
 
