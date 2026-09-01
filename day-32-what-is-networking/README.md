@@ -32,15 +32,15 @@ For devices to communicate in an ordered way, they need to be both **identifying
 
 **1. Reviewed the Hotel Wifi lab's starting state.** Bob (MAC `04:9E:44:99:A3:12`) hasn't paid for Wi-Fi, so the router drops his packets straight into the bin. Alice (MAC `00:12:32:2F:33:39`) has paid, so her packets go through to the router fine — the lab's whole premise is that the router is filtering purely on MAC address.
 
-![Hotel Wifi lab — Bob blocked, Alice allowed](screenshots/01-hotel-wifi-bob-blocked-alice-allowed.png)
+![Hotel Wifi lab — Bob blocked, Alice allowed](screenshots/01-hotel-wifi-bob-blocked-alice-allowed.PNG)
 
 **2. Spoofed Bob's MAC address to match Alice's.** Changed Bob's MAC address field to `00:12:32:2F:33:39` — identical to Alice's — and hit Request Site again. With both devices now presenting the same MAC, the router let Bob's traffic through too and revealed the flag: `THM{YOU_GOT_ON_TRYHACKME}`.
 
-![MAC spoofing bypasses the filter — flag revealed](screenshots/02-mac-spoofing-flag-revealed.png)
+![MAC spoofing bypasses the filter — flag revealed](screenshots/02-mac-spoofing-flag-revealed.PNG)
 
 **3. Ran the Network Ping practical.** Used `ping -c 4 8.8.8.8` in the deployed terminal, sending four ICMP echo requests to `8.8.8.8` — all four came back with 0% packet loss and an average round-trip time around 9.4ms, and the terminal printed the flag directly: `THM{I_PINGED_THE_SERVER}`.
 
-![Ping 8.8.8.8 — flag revealed](screenshots/03-ping-8888-flag.png)
+![Ping 8.8.8.8 — flag revealed](screenshots/03-ping-8888-flag.PNG)
 
 ---
 
