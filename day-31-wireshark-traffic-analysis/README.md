@@ -241,7 +241,3 @@ This room is the applied half of the Wireshark series: instead of learning the t
 - The ARP MITM walkthrough was a good end-to-end reminder that a single suspicious ARP packet isn't the finding — the finding is the *chain*: one MAC claiming two IPs, flooding requests against a range, then showing up as the destination MAC on someone else's HTTP traffic. Each step alone is ambiguous; together they're conclusive.
 - "Never whitelist a user agent" landed harder after actually finding a typo'd one sitting next to normal traffic (packet 52) — it would have been trivial to skim past.
 
----
-
-*Previous: [Day 30 — _placeholder, update with your Day 30 title/link_](../day30/day30.md)*
-*Next: coming soon*
