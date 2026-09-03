@@ -8,7 +8,7 @@
 
 ## 📌 Overview
 
-This room moves from the *why* of logging (covered in [Day 39](../day39/day39.md) and [Day 40](../day40/day40.md)) into the actual mechanics of analysing a log file — first from the command line, then with regular expressions, and finally with CyberChef as a dedicated analysis tool.
+This room moves from the *why* of logging (covered in [Day 39](../day-39-intro-to-logs/README.md) and [Day 40](../day40/day40.md)) into the actual mechanics of analysing a log file — first from the command line, then with regular expressions, and finally with CyberChef as a dedicated analysis tool.
 
 The room opens with the basics: what a log entry contains (timestamp, source, severity, action, and event-specific fields), and why organisations bother collecting and analysing them — system troubleshooting, security incident detection, proactive threat hunting, and regulatory compliance. It walks through severity levels (Informational → Warning → Error → Critical) using a firewall log example, then recaps the log types from Intro to Logs (application, audit, security, server, system, network, database, web server).
 
