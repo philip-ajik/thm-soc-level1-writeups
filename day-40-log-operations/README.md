@@ -8,7 +8,7 @@
 
 ## 📌 Overview
 
-This room is the operational/management follow-up to [Day 39 — Intro to Logs](../day39/day39.md), moving from "what is a log" to "how do you actually plan and configure logging in an organisation." No VM this time — it's entirely concept and scenario-based.
+This room is the operational/management follow-up to [Day 39 — Intro to Logs](../day39/README.md), moving from "what is a log" to "how do you actually plan and configure logging in an organisation." No VM this time — it's entirely concept and scenario-based.
 
 The core idea is that log configuration isn't one-size-fits-all — it serves four distinct purposes, and mixing them up leads to either wasted resources or missed requirements:
 
