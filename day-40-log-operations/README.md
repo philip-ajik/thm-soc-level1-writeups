@@ -59,7 +59,7 @@ This room didn't have a hands-on component, so there were no steps to walk throu
 
 ## 💡 Lessons Learned
 
-- This room reframed logging as a planning and governance problem before it's a technical one — the four purposes (Security/Operational/Legal/Debug) give a useful lens for *why* a given log source or retention period exists, which is easy to lose sight of when you're just staring at rsyslog configs like in [Day 39](../day39/day39.md).
+- This room reframed logging as a planning and governance problem before it's a technical one — the four purposes (Security/Operational/Legal/Debug) give a useful lens for *why* a given log source or retention period exists, which is easy to lose sight of when you're just staring at rsyslog configs like in [Day 39](https://github.com/philip-ajik/thm-soc-level1-writeups/tree/main/day-39-intro-to-logs).
 - The base-requirements-vs-aspirations split maps well onto reactive incident response vs. proactive threat hunting — it's a good mental model for justifying "why do we need more than the minimum" conversations with stakeholders who are budget-focused.
 - The EternalBlue/Windows 7 example is a concrete argument for something I've seen asserted abstractly before but not tied to a real CVE: default logging configs are often not fit for security purposes out of the box, and "it hasn't been touched" is not the same as "it's fine."
 - Connects directly to the SIEM-02 forwarding configuration from Day 39, where the forwarding line was present but commented out — exactly the kind of planning gap ("lack of implementation," per this room's mistakes list) that this room warns produces blind spots until it's too late.
